@@ -140,6 +140,13 @@ impl MarketContract {
         let bets: Map<Address, (u32, i128)> = env.storage().instance().get(&bets_key).unwrap_or_else(|| Map::new(&env));
         let sac_addr = Address::from_str(&env, SAC_CONTRACT_ID);
 
+        // Get creator and fee from metadata
+        let creator_key = symbol_short!("creator");
+        let meta_key = Symbol::new(&env, "metadata");
+        let creator = env.storage().instance().get::<_, Address>(&creator_key).unwrap();
+        let metadata = env.storage().instance().get::<_, MarketMetadata>(&meta_key).unwrap();
+        let creator_fee = metadata.creator_fee as i128; // integer percent
+
         // Calculate total bets on winning and losing outcomes
         let mut total_winning_bets: i128 = 0;
         let mut total_losing_bets: i128 = 0;
@@ -152,22 +159,24 @@ impl MarketContract {
         }
         let total_pool = total_winning_bets + total_losing_bets;
 
+        // Calculate and transfer creator fee
+        let creator_fee_amount = (total_pool * creator_fee) / 100;
+        if creator_fee_amount > 0 {
+            env.invoke_contract::<()>(&sac_addr, &symbol_short!("transfer"), (env.current_contract_address(), creator.clone(), creator_fee_amount).into_val(&env));
+        }
+        let distributable_pool = total_pool - creator_fee_amount;
+
         // Distribute rewards proportionally to winners
         for (bettor, (bet_outcome, amount)) in bets.iter() {
             if bet_outcome == winning_outcome && total_winning_bets > 0 {
-                // reward = (their_bet / total_winning_bets) * total_pool
-                // Integer math: (their_bet * total_pool) / total_winning_bets
-                let reward = (amount * total_pool) / total_winning_bets;
+                // reward = (their_bet / total_winning_bets) * distributable_pool
+                let reward = (amount * distributable_pool) / total_winning_bets;
                 env.invoke_contract::<()>(&sac_addr, &symbol_short!("transfer"), (env.current_contract_address(), bettor.clone(), reward).into_val(&env));
             }
         }
         // Optionally, return stake to creator or burn it if market was malicious
-        let creator_key = symbol_short!("creator");
         let stake_key = symbol_short!("stake");
-        if let (Some(creator), Some(stake)) = (
-            env.storage().instance().get::<_, Address>(&creator_key),
-            env.storage().instance().get::<_, i128>(&stake_key),
-        ) {
+        if let Some(stake) = env.storage().instance().get::<_, i128>(&stake_key) {
             env.invoke_contract::<()>(&sac_addr, &symbol_short!("transfer"), (env.current_contract_address(), creator, stake).into_val(&env));
         }
     }
