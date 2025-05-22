@@ -2,10 +2,7 @@
 
 .env
 
-contracts/out/*/node_modules
-contracts/out/*/pnpm-lock.yaml
-contracts/out/*/package-lock.json
-contracts/out/*/package.json
-contracts/out/*/tsconfig.json
-contracts/out/*/tsconfig.node.json
-contracts/out/*/tsconfig.app.json
+contracts/out/market-policy-sdk/node_modules
+contracts/out/sac-sdk/node_modules
+contracts/out/passkey-kit-sdk/node_modules
+contracts/out/user-policy-sdk/node_modules
