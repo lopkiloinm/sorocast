@@ -1,8 +1,8 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contracterror, contractimpl, panic_with_error,
-    symbol_short, Env, Map, Address, IntoVal
+    contract, contracterror, contractimpl, contracttype, panic_with_error,
+    symbol_short, Env, Map, Address, IntoVal, String, Vec, Symbol
 };
 
 const CREATION_STAKE: i128 = 1000 * 1_000_0000; // 1000 XLM
@@ -26,21 +26,65 @@ pub enum Error {
     NotEnoughLiquidity = 10,
 }
 
+#[contracttype]
+#[derive(Clone)]
+pub struct MarketMetadata {
+    pub title: String,
+    pub description: String,
+    pub category: String,
+    pub end_date: u64,
+    pub resolution_source: String,
+    pub options: Vec<String>,
+    pub probabilities: Vec<u32>,
+    pub market_type: u32,
+    pub creator_fee: u32,
+    pub allow_additional_options: bool,
+}
+
 #[contract]
 pub struct MarketContract;
 
 #[contractimpl]
 impl MarketContract {
-    // Market creation with stake locking
-    pub fn create_market(env: Env, creator: Address, stake: i128) {
-        creator.require_auth(); // Require the smart wallet (passkey) to sign
+    // Market creation with stake locking and metadata
+    pub fn create_market(
+        env: Env,
+        creator: Address,
+        stake: i128,
+        metadata: MarketMetadata,
+    ) {
+        creator.require_auth();
         if stake < CREATION_STAKE {
             panic_with_error!(&env, Error::NotEnoughStake);
         }
+        // Validate options
+        if metadata.options.len() < 2 {
+            panic_with_error!(&env, Error::BadArgs);
+        }
+        if metadata.options.len() != metadata.probabilities.len() {
+            panic_with_error!(&env, Error::BadArgs);
+        }
+        // Probabilities must sum to 100
+        let prob_sum: u32 = metadata.probabilities.iter().sum();
+        if prob_sum != 100 {
+            panic_with_error!(&env, Error::BadArgs);
+        }
+        // Creator fee max 5%
+        if metadata.creator_fee > 5 {
+            panic_with_error!(&env, Error::BadArgs);
+        }
+        // End date must be in the future
+        let ledger_ts = env.ledger().timestamp();
+        if metadata.end_date <= ledger_ts {
+            panic_with_error!(&env, Error::BadArgs);
+        }
+        // Store all fields
         let creator_key = symbol_short!("creator");
         let stake_key = symbol_short!("stake");
+        let meta_key = Symbol::new(&env, "metadata");
         env.storage().instance().set(&creator_key, &creator);
         env.storage().instance().set(&stake_key, &stake);
+        env.storage().instance().set(&meta_key, &metadata);
         // Transfer stake from creator to contract (call SAC)
         let sac_addr = Address::from_str(&env, SAC_CONTRACT_ID);
         env.invoke_contract::<()>(&sac_addr, &symbol_short!("transfer"), (creator.clone(), env.current_contract_address(), stake).into_val(&env));

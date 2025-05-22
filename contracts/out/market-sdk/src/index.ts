@@ -55,11 +55,25 @@ export const Errors = {
   10: {message:"NotEnoughLiquidity"}
 }
 
+export interface MarketMetadata {
+  allow_additional_options: boolean;
+  category: string;
+  creator_fee: u32;
+  description: string;
+  end_date: u64;
+  market_type: u32;
+  options: Array<string>;
+  probabilities: Array<u32>;
+  resolution_source: string;
+  title: string;
+}
+
+
 export interface Client {
   /**
    * Construct and simulate a create_market transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  create_market: ({creator, stake}: {creator: string, stake: i128}, options?: {
+  create_market: ({creator, stake, metadata}: {creator: string, stake: i128, metadata: MarketMetadata}, options?: {
     /**
      * The fee to pay for the transaction. Default: BASE_FEE
      */
@@ -175,7 +189,8 @@ export class Client extends ContractClient {
   constructor(public readonly options: ContractClientOptions) {
     super(
       new ContractSpec([ "AAAABAAAAAAAAAAAAAAABUVycm9yAAAAAAAACgAAAAAAAAAKTm90QWxsb3dlZAAAAAAAAQAAAAAAAAAHQmFkQXJncwAAAAACAAAAAAAAABBBbHJlYWR5RmluYWxpemVkAAAAAwAAAAAAAAAMTm90RmluYWxpemVkAAAABAAAAAAAAAAKQWxyZWFkeUJldAAAAAAABQAAAAAAAAAFTm9CZXQAAAAAAAAGAAAAAAAAAA9BbHJlYWR5UHJvcG9zZWQAAAAABwAAAAAAAAAKTm90Q3JlYXRvcgAAAAAACAAAAAAAAAAOTm90RW5vdWdoU3Rha2UAAAAAAAkAAAAAAAAAEk5vdEVub3VnaExpcXVpZGl0eQAAAAAACg==",
-        "AAAAAAAAAAAAAAANY3JlYXRlX21hcmtldAAAAAAAAAIAAAAAAAAAB2NyZWF0b3IAAAAAEwAAAAAAAAAFc3Rha2UAAAAAAAALAAAAAA==",
+        "AAAAAQAAAAAAAAAAAAAADk1hcmtldE1ldGFkYXRhAAAAAAAKAAAAAAAAABhhbGxvd19hZGRpdGlvbmFsX29wdGlvbnMAAAABAAAAAAAAAAhjYXRlZ29yeQAAABAAAAAAAAAAC2NyZWF0b3JfZmVlAAAAAAQAAAAAAAAAC2Rlc2NyaXB0aW9uAAAAABAAAAAAAAAACGVuZF9kYXRlAAAABgAAAAAAAAALbWFya2V0X3R5cGUAAAAABAAAAAAAAAAHb3B0aW9ucwAAAAPqAAAAEAAAAAAAAAANcHJvYmFiaWxpdGllcwAAAAAAA+oAAAAEAAAAAAAAABFyZXNvbHV0aW9uX3NvdXJjZQAAAAAAABAAAAAAAAAABXRpdGxlAAAAAAAAEA==",
+        "AAAAAAAAAAAAAAANY3JlYXRlX21hcmtldAAAAAAAAAMAAAAAAAAAB2NyZWF0b3IAAAAAEwAAAAAAAAAFc3Rha2UAAAAAAAALAAAAAAAAAAhtZXRhZGF0YQAAB9AAAAAOTWFya2V0TWV0YWRhdGEAAAAAAAA=",
         "AAAAAAAAAAAAAAARcHJvdmlkZV9saXF1aWRpdHkAAAAAAAACAAAAAAAAAAhwcm92aWRlcgAAABMAAAAAAAAABmFtb3VudAAAAAAACwAAAAA=",
         "AAAAAAAAAAAAAAAJcGxhY2VfYmV0AAAAAAAAAwAAAAAAAAAGYmV0dG9yAAAAAAATAAAAAAAAAAdvdXRjb21lAAAAAAQAAAAAAAAABmFtb3VudAAAAAAACwAAAAA=",
         "AAAAAAAAAAAAAAAHcmVzb2x2ZQAAAAAAAAAAAA==",

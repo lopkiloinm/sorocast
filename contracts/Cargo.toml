@@ -2,11 +2,12 @@
 resolver = "2"
 
 members = [
+    "market",
     "smart-wallet",
-    "smart-wallet-interface",
-    "example-contract",
     "sample-policy",
-    "market"
+    "example-contract",
+    "smart-wallet-interface",
+    "oracle"
 ]
 
 [workspace.dependencies]
