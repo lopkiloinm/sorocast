@@ -1,0 +1,11 @@
+.stellar/identity/*
+
+.env
+
+contracts/out/*/node_modules
+contracts/out/*/pnpm-lock.yaml
+contracts/out/*/package-lock.json
+contracts/out/*/package.json
+contracts/out/*/tsconfig.json
+contracts/out/*/tsconfig.node.json
+contracts/out/*/tsconfig.app.json
