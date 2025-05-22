@@ -870,10 +870,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
 
 [[package]]
-name = "market_policy"
+name = "market"
 version = "0.1.0"
 dependencies = [
- "smart-wallet-interface",
  "soroban-sdk",
 ]
 
@@ -1704,14 +1703,6 @@ name = "unicode-ident"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512"
-
-[[package]]
-name = "user_policy"
-version = "0.1.0"
-dependencies = [
- "smart-wallet-interface",
- "soroban-sdk",
-]
 
 [[package]]
 name = "version_check"

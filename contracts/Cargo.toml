@@ -6,8 +6,7 @@ members = [
     "smart-wallet-interface",
     "example-contract",
     "sample-policy",
-    "policies/user_policy",
-    "policies/market_policy"
+    "market"
 ]
 
 [workspace.dependencies]

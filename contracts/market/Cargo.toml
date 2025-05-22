@@ -1,5 +1,5 @@
 [package]
-name = "market_policy"
+name = "market"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,6 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 soroban-sdk = { version = "22.0.0-rc.3.2" }
-smart-wallet-interface = { path = "../../smart-wallet-interface" }
 
 [dev-dependencies]
 soroban-sdk = { version = "22.0.0-rc.3.2", features = ["testutils"] }
